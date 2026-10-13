@@ -1,0 +1,364 @@
+package bian;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+public class XYZMenuOrderingSystem extends JFrame implements ActionListener {
+
+    // UI colors
+    Color bgColor = new Color(255, 228, 235); // light pink background
+    Color menuPanelColor = new Color(255, 245, 247);
+    Color titleColor = new Color(255, 182, 193);
+
+    String[] itemNames = {
+        "Burger","Cheeseburger","Fried Chicken Meal","Spaghetti","Hotdog Sandwich","Chicken Sandwich",
+        "Chicken Adobo with Rice","Pork BBQ with Rice","Beef Tapa with Rice","Fried Chicken with Rice","Longganisa with Rice",
+        "French Fries","Nachos","Onion Rings","Siomai","Lumpiang Shanghai",
+        "Coke","Sprite","Iced Tea","Lemonade","Bottled Water","Milk Tea",
+        "Ice Cream","Halo-Halo","Chocolate Cake","Mango Float","Donut",
+        "Extra Rice","Extra Cheese","Extra Sauce","Upgrade to Large Drink"
+    };
+
+    double[] prices = {
+        50,60,95,70,45,55,
+        90,100,110,105,95,
+        40,50,45,35,30,
+        20,20,25,25,15,60,
+        30,45,60,55,25,
+        15,10,5,20
+    };
+
+    JCheckBox[] menuCheckBox = new JCheckBox[itemNames.length];
+    JTextField[] quantityField = new JTextField[itemNames.length];
+
+    JTextArea receiptBox;
+
+    JCheckBox studentDiscount;
+    JCheckBox seniorDiscount;
+
+    JTextField cashInput;
+
+    JButton computeButton;
+    JButton placeOrderBtn;
+    JButton clearButton;
+
+    int receiptNumber = 1;
+
+    DecimalFormat peso = new DecimalFormat("₱0.00");
+
+    // Category arrays
+    // These arrays help in building an organized menu
+
+    String[] mainCourse = {
+        "Burger","Cheeseburger","Fried Chicken Meal","Spaghetti","Hotdog Sandwich","Chicken Sandwich"
+    };
+
+    String[] riceMeals = {
+        "Chicken Adobo with Rice","Pork BBQ with Rice","Beef Tapa with Rice","Fried Chicken with Rice","Longganisa with Rice"
+    };
+
+    String[] snacks = {
+        "French Fries","Nachos","Onion Rings","Siomai","Lumpiang Shanghai"
+    };
+
+    String[] drinks = {
+        "Coke","Sprite","Iced Tea","Lemonade","Bottled Water","Milk Tea"
+    };
+
+    String[] desserts = {
+        "Ice Cream","Halo-Halo","Chocolate Cake","Mango Float","Donut"
+    };
+
+    String[] addons = {
+        "Extra Rice","Extra Cheese","Extra Sauce","Upgrade to Large Drink"
+    };
+
+    // Constructor
+    // Runs when the program starts and builds the interface
+    public XYZMenuOrderingSystem(){
+
+        setTitle("XYZ Menu Ordering System");
+        setSize(1100,700);
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setLayout(new BorderLayout());
+        getContentPane().setBackground(bgColor);
+
+        // Build the UI sections
+        createTitle();
+        createMenuPanel();
+        createReceiptPanel();
+        createBottomPanel();
+
+        setVisible(true);
+    }
+
+    // Creates the title at the top of the window
+    private void createTitle(){
+
+        JLabel title = new JLabel("XYZ MENU ORDERING SYSTEM", JLabel.CENTER);
+        title.setFont(new Font("Arial",Font.BOLD,26));
+        title.setOpaque(true);
+        title.setBackground(titleColor);
+        title.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
+
+        add(title,BorderLayout.NORTH);
+    }
+
+    // Creates a panel for each menu category
+    private JPanel createCategoryPanel(String title,String[] items,int startIndex){
+
+        JPanel panel = new JPanel(new GridBagLayout());
+        panel.setBorder(BorderFactory.createTitledBorder(title));
+        panel.setBackground(menuPanelColor);
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(3,3,3,3);
+        gbc.anchor = GridBagConstraints.WEST;
+
+        for(int i=0;i<items.length;i++){
+
+            int index = startIndex + i;
+
+            menuCheckBox[index] = new JCheckBox(items[i] + " (" + peso.format(prices[index]) + ")");
+            menuCheckBox[index].setBackground(menuPanelColor);
+
+            quantityField[index] = new JTextField(3);
+            quantityField[index].setHorizontalAlignment(JTextField.CENTER);
+
+            gbc.gridx = 0;
+            gbc.gridy = i;
+            panel.add(menuCheckBox[index],gbc);
+
+            gbc.gridx = 1;
+            panel.add(new JLabel("Qty:"),gbc);
+
+            gbc.gridx = 2;
+            panel.add(quantityField[index],gbc);
+        }
+
+        return panel;
+    }
+
+    // Menu panel
+    private void createMenuPanel(){
+
+        JPanel container = new JPanel(new GridLayout(6,2,8,8));
+        container.setBackground(bgColor);
+
+        int index = 0;
+
+        container.add(createCategoryPanel("Main Course",mainCourse,index));
+        index += mainCourse.length;
+
+        container.add(createCategoryPanel("Rice Meals",riceMeals,index));
+        index += riceMeals.length;
+
+        container.add(createCategoryPanel("Snacks",snacks,index));
+        index += snacks.length;
+
+        container.add(createCategoryPanel("Drinks",drinks,index));
+        index += drinks.length;
+
+        container.add(createCategoryPanel("Desserts",desserts,index));
+        index += desserts.length;
+
+        container.add(createCategoryPanel("Add-ons",addons,index));
+
+        JScrollPane scroll = new JScrollPane(container);
+        scroll.setPreferredSize(new Dimension(420,500));
+
+        add(scroll,BorderLayout.WEST);
+    }
+
+    // Receipt panel
+    private void createReceiptPanel(){
+
+        receiptBox = new JTextArea();
+        receiptBox.setMargin(new Insets(10,15,10,15));
+        receiptBox.setFont(new Font("Monospaced",Font.PLAIN,14));
+        receiptBox.setEditable(false);
+
+        JScrollPane scroll = new JScrollPane(receiptBox);
+        add(scroll,BorderLayout.CENTER);
+    }
+
+    // Bottom panel with discounts, cash input, and buttons
+    private void createBottomPanel(){
+
+        JPanel bottom = new JPanel();
+        bottom.setBackground(menuPanelColor);
+
+        studentDiscount = new JCheckBox("Student Discount (10%)");
+        seniorDiscount = new JCheckBox("Senior Citizen Discount (20%)");
+
+        bottom.add(studentDiscount);
+        bottom.add(seniorDiscount);
+
+        bottom.add(new JLabel("Cash:"));
+
+        cashInput = new JTextField(8);
+        bottom.add(cashInput);
+
+        computeButton = new JButton("Compute Bill");
+        placeOrderBtn = new JButton("Confirm Order");
+        clearButton = new JButton("Reset Order");
+
+        computeButton.addActionListener(this);
+        placeOrderBtn.addActionListener(this);
+        clearButton.addActionListener(this);
+
+        bottom.add(computeButton);
+        bottom.add(placeOrderBtn);
+        bottom.add(clearButton);
+
+        add(bottom,BorderLayout.SOUTH);
+    }
+
+    // Detect which button the user clicked
+    public void actionPerformed(ActionEvent e){
+
+        if(e.getSource()==computeButton){
+            generateReceipt(false);
+        }
+
+        if(e.getSource()==placeOrderBtn){
+            generateReceipt(true);
+        }
+
+        if(e.getSource()==clearButton){
+            clearOrder();
+        }
+    }
+
+    // Calculates totals and prints the receipt
+    private void generateReceipt(boolean finalize){
+
+        receiptBox.setText("");
+
+        double subtotal = 0;
+        boolean selected = false;
+
+        StringBuilder receipt = new StringBuilder();
+
+        receipt.append("       XYZ FOOD ORDERING SYSTEM\n");
+        receipt.append("====================================\n");
+        receipt.append("Receipt No: ").append(receiptNumber).append("\n");
+
+        SimpleDateFormat date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        receipt.append("Date: ").append(date.format(new Date())).append("\n");
+
+        receipt.append("------------------------------------\n");
+
+        for(int i=0;i<itemNames.length;i++){
+
+            if(menuCheckBox[i]!=null && menuCheckBox[i].isSelected()){
+
+                selected = true;
+
+                try{
+
+                    int qty = Integer.parseInt(quantityField[i].getText());
+
+                    if(qty<=0){
+                        throw new NumberFormatException();
+                    }
+
+                    double itemTotal = qty * prices[i];
+                    subtotal += itemTotal;
+                    receipt.append(itemNames[i] + " x" + qty + " = " + peso.format(itemTotal) + "\n");
+
+                }catch(Exception ex){
+                    receiptBox.setText("Invalid quantity for: " + itemNames[i]);
+                    return;
+                }
+            }
+        }
+
+        if(!selected){
+            receiptBox.setText("Please select at least one item.");
+            return;
+        }
+
+        receipt.append("------------------------------------\n");
+        receipt.append(String.format("Subtotal: %25s\n",peso.format(subtotal)));
+
+        if(studentDiscount.isSelected() && seniorDiscount.isSelected()){
+            receiptBox.setText("Only ONE discount can be applied.");
+            return;
+        }
+
+        double discount = 0;
+        String discountType = "None";
+
+        if(studentDiscount.isSelected()){
+            discount = subtotal * 0.10;
+            discountType = "Student (10%)";
+        }
+
+        if(seniorDiscount.isSelected()){
+            discount = subtotal * 0.20;
+            discountType = "Senior (20%)";
+        }
+
+        double total = subtotal - discount;
+
+        receipt.append("Discount: ").append(discountType).append("\n");
+        receipt.append(String.format("Discount Amount: %16s\n",peso.format(discount)));
+        receipt.append(String.format("Final Total: %21s\n",peso.format(total)));
+
+        if(finalize){
+
+            try{
+
+                double cash = Double.parseDouble(cashInput.getText());
+
+                if(cash < total){
+                    receiptBox.setText("Cash is insufficient.");
+                    return;
+                }
+
+                double change = cash - total;
+
+                receipt.append("------------------------------------\n");
+                receipt.append(String.format("Cash: %27s\n",peso.format(cash)));
+                receipt.append(String.format("Change: %25s\n",peso.format(change)));
+
+                receipt.append("\nThank you for dining with us!");
+
+                receiptNumber++;
+
+            }catch(Exception ex){
+                receiptBox.setText("Invalid cash input.");
+                return;
+            }
+        }
+
+        receiptBox.setText(receipt.toString());
+    }
+
+    // Resets the entire form
+    private void clearOrder(){
+
+        for(int i=0;i<itemNames.length;i++){
+
+            if(menuCheckBox[i]!=null){
+                menuCheckBox[i].setSelected(false);
+                quantityField[i].setText("");
+            }
+        }
+
+        studentDiscount.setSelected(false);
+        seniorDiscount.setSelected(false);
+        cashInput.setText("");
+        receiptBox.setText("");
+    }
+
+    // Starts the program
+    public static void main(String[] args){
+
+        SwingUtilities.invokeLater(() -> new XYZMenuOrderingSystem());
+    }
+}
